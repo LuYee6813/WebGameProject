@@ -1,5 +1,4 @@
 #canvas1 {
-    border: 5px solid rgb(0, 0, 0);
     position: absolute;
     top: 50%;
     left: 50%;
@@ -7,4 +6,13 @@
     transform: translate(-50%, -50%);
     height: 600px;
     width: 600px;
+}
+.controls {
+    position: absolute;
+    z-index: 10;
+    left:40%;
+}
+
+.controls, select, option {
+    font-size: 25px;
 }
