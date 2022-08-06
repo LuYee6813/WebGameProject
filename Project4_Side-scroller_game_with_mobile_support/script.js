@@ -43,6 +43,10 @@ window.addEventListener('load',function(){
             this.image = document.getElementById('player');
             this.frameX = 0;
             this.frameY = 0;
+            this.maxFrame = 7;
+            this.fps = 20;
+            this.frameTimer = 0;
+            this.frameInterval = 800/this.fps;
             this.speed = 1;
             this.vy = 0;
             this.weight = 1;
@@ -62,7 +66,7 @@ window.addEventListener('load',function(){
                 this.height                 //dh
             );
         }
-        update(input){
+        update(input,deltaTime){
             if (input.keys.indexOf('ArrowRight') > -1){
                 this.speed = 5;
             } else if (input.keys.indexOf('ArrowLeft') > -1){
@@ -72,18 +76,27 @@ window.addEventListener('load',function(){
             }else {
                 this.speed =0;
             }
+
             // horizontal movement
             this.x += this.speed;
             if (this.x < 0) this.x = 0;
             else if (this.x > this.gameWidth - this.width) this.x = this.gameWidth - this.width;
+
             // vertical movement
             this.y += this.vy;
+            // jump
             if (!this.onGround()){
-                this.frameX = 0;
                 this.vy += this.weight;
                 this.frameY = 1;
+            // run 
             } else {
-                this.frameX > 7 ? this.frameX = 0 : this.frameX++;
+                if(this.frameTimer > this.frameInterval) {
+                    if(this.frameX >= this.maxFrame) this.frameX = 0;
+                    else this.frameX++;
+                    this.frameTimer = 0;
+                } else {
+                    this.frameTimer+=deltaTime;
+                }
                 this.vy = 0;
                 this.frameY = 0;
             }
@@ -103,9 +116,13 @@ window.addEventListener('load',function(){
             this.image = document.getElementById('enemy');
             this.x = this.gameWidth - this.width;
             this.y = this.gameHeight - this.height;
+            this.speed = 5;
+            this.fps = 20;
             this.frameX = 0;
             this.frameY = 0;
-            this.speed = 5;
+            this.maxFrame = 5;
+            this.frameTimer = 0;
+            this.frameInterval = 1000/this.fps;
         };
         draw(context){
             context.drawImage(
@@ -120,8 +137,14 @@ window.addEventListener('load',function(){
                 this.height                            
             );
         }
-        update(){
-            this.frameX > 4 ? this.frameX = 0 : this.frameX++;
+        update(deltaTime){
+            if (this.frameTimer > this.frameInterval){
+                if (this.frameX >= this.maxFrame) this.frameX = 0;
+                else this.frameX++;
+                this.frameTimer = 0;
+            } else {
+                this.frameTimer += deltaTime;
+            }
             this.x -= this.speed;
         };
 
@@ -135,7 +158,7 @@ window.addEventListener('load',function(){
             this.y = 0;
             this.width = 2400;
             this.height = 720;
-            this.speed = 15;
+            this.speed = 8;
         }
         draw(context){
             context.drawImage(this.image, this.x,this.y, this.width,this.height);
@@ -157,7 +180,7 @@ window.addEventListener('load',function(){
         }
         enemies.forEach(enemy => {
             enemy.draw(ctx);
-            enemy.update();
+            enemy.update(deltaTime);
         })
     }
 
@@ -181,7 +204,7 @@ window.addEventListener('load',function(){
         background.draw(ctx);
         background.update();
         player.draw(ctx);
-        player.update(input); 
+        player.update(input,deltaTime); 
         handleEnemies(deltaTime);
         requestAnimationFrame(animate);    
     }
