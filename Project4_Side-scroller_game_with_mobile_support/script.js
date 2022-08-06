@@ -43,7 +43,7 @@ window.addEventListener('load',function(){
             this.image = document.getElementById('player');
             this.frameX = 0;
             this.frameY = 0;
-            this.maxFrame = 7;
+            this.maxFrame = 8;
             this.fps = 20;
             this.frameTimer = 0;
             this.frameInterval = 800/this.fps;
@@ -67,6 +67,26 @@ window.addEventListener('load',function(){
             );
         }
         update(input,deltaTime){
+            // sprite animation
+            // run
+            if(this.frameTimer > this.frameInterval) {
+                if(this.frameX >= this.maxFrame) this.frameX = 0;
+                else this.frameX++;
+                this.frameTimer = 0;
+            } else {
+                this.frameTimer+=deltaTime;
+            }
+
+            // jump
+            if(this.frameTimer > this.frameInterval) {
+                if(this.frameX >= this.maxFrame) this.frameX = 0;
+                else this.frameX++;
+                this.frameTimer = 0;
+            } else {
+                this.frameTimer+=deltaTime;
+            }
+
+            // controls
             if (input.keys.indexOf('ArrowRight') > -1){
                 this.speed = 5;
             } else if (input.keys.indexOf('ArrowLeft') > -1){
@@ -83,24 +103,19 @@ window.addEventListener('load',function(){
             else if (this.x > this.gameWidth - this.width) this.x = this.gameWidth - this.width;
 
             // vertical movement
+            if (this.y > this.gameHeight - this.height) this.y = this.gameHeight - this.height;
             this.y += this.vy;
-            // jump
+
             if (!this.onGround()){
-                this.vy += this.weight;
                 this.frameY = 1;
-            // run 
+                this.vy += this.weight;
+                this.maxFrame = 6;
             } else {
-                if(this.frameTimer > this.frameInterval) {
-                    if(this.frameX >= this.maxFrame) this.frameX = 0;
-                    else this.frameX++;
-                    this.frameTimer = 0;
-                } else {
-                    this.frameTimer+=deltaTime;
-                }
                 this.vy = 0;
                 this.frameY = 0;
+                this.maxFrame = 8;
             }
-            if (this.y > this.gameHeight - this.height) this.y = this.gameHeight - this.height;
+
         }
         onGround(){
             return this.y >= this.gameHeight - this.height;
@@ -123,6 +138,7 @@ window.addEventListener('load',function(){
             this.maxFrame = 5;
             this.frameTimer = 0;
             this.frameInterval = 1000/this.fps;
+            this.markedForDeletion = false;
         };
         draw(context){
             context.drawImage(
@@ -146,6 +162,8 @@ window.addEventListener('load',function(){
                 this.frameTimer += deltaTime;
             }
             this.x -= this.speed;
+            if (this.x < 0 - this.width) this.markedForDeletion = true;
+            else this.markedForDeletion = false;
         };
 
     }
@@ -184,8 +202,10 @@ window.addEventListener('load',function(){
         })
     }
 
-    function displayText(){  
-        
+    function displayText(context){  
+        context.fillStyle = 'black';
+        context.font = '40px Helvetica';
+        context.fillText('Score: ',20,50);
     }
 
     const input = new InputHandler();
@@ -206,6 +226,7 @@ window.addEventListener('load',function(){
         player.draw(ctx);
         player.update(input,deltaTime); 
         handleEnemies(deltaTime);
+        displayText(ctx);
         requestAnimationFrame(animate);    
     }
     animate(0);
